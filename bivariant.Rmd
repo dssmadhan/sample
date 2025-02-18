@@ -1,0 +1,224 @@
+---
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.16.7
+  kernelspec:
+    display_name: Python 3
+    language: python
+    name: python3
+---
+
+CORRELATION ANALYSIS
+
+```{python}
+import pandas as pd
+
+# Create a DataFrame with sample data
+data = pd.DataFrame({'X': [1, 2, 3, 4, 5], 'Y': [1,2,3,4,5]})
+
+# Calculate correlation coefficient
+correlation_coefficient = data['X'].corr(data['Y'])
+
+print("Correlation Coefficient:", correlation_coefficient)
+
+```
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+```
+
+```{python}
+import pandas as pd
+columns = pd.read_csv("diabetes.csv");
+columns.corr()
+```
+
+```{python}
+data={
+    'x':[1,2,3,4,5],
+    'y':[2,4,6,8,10]
+}
+c=pd.DataFrame(data);
+print(c.corr())
+```
+
+```{python}
+correlation_matrix = columns.corr()
+
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt='.2f', linewidths=0.5)
+plt.title('Correlation Heatmap of Diabetes Dataset')
+plt.show()
+```
+
+```{python}
+columns[['Age','BMI']].corr(method='kendall')
+```
+
+```{python}
+import numpy as np
+print(np.corrcoef(columns['Outcome'],columns['Age']))
+```
+
+SCATTER PLOTS
+
+```{python}
+import matplotlib.pyplot as plt
+
+# Sample Data
+age = [25, 30, 35, 40, 45]
+income = [50000, 60000, 70000, 80000, 90000]
+
+# Create Scatter Plot
+plt.scatter(age, income, color='blue', marker='o')
+
+# Add Labels and Title
+plt.xlabel('Age')
+plt.ylabel('Income')
+plt.title('Age vs Income Scatter Plot')
+
+# Show Grid
+plt.grid(True)
+
+# Display Plot
+plt.show()
+
+```
+
+```{python}
+plt.scatter(columns['Insulin'],columns['BMI'],color='red',marker='')
+plt.xlabel('Insulin')
+plt.ylabel('BMI')
+plt.title('Insulin vs BMI')
+sns.scatterplot(x='Insulin',y='BMI',data=columns)
+plt.grid(True)
+plt.show()
+```
+
+```{python}
+plt.scatter(columns['Glucose'],columns['Age'],color='red',marker='o')
+
+plt.xlabel('Glucose')
+plt.ylabel('Age')
+
+plt.plot(columns['Glucose'],columns['Age'])
+plt.grid(True)
+
+plt.show()
+```
+
+CROSS TABULATION
+
+```{python}
+import pandas as pd
+
+# Sample Data
+data = {
+    'Gender': ['Male', 'Female', 'Female', 'Male', 'Female', 'Male', 'Female', 'Male'],
+    'Purchase': ['Yes', 'No', 'Yes', 'Yes', 'No', 'No', 'Yes', 'Yes']
+}
+
+df = pd.DataFrame(data)
+
+# Cross Tabulation
+crosstab = pd.crosstab(df['Gender'], df['Purchase'])
+print(crosstab)
+```
+
+```{python}
+columns['age_bin']=pd.cut(columns['Age'],bins=3,labels=['21-41','41-61','61-81'])
+pd.crosstab(columns['Glucose'],columns['age_bin'])
+```
+
+```{python}
+columns.sample(5)
+```
+
+BIVARIANT REGRESSION (LINEAR)
+
+```{python}
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Load your dataset (replace 'your_dataset.csv' with your actual file path)
+
+
+# Select the independent and dependent variables
+X = columns[['BMI']]  # Independent variable
+y = columns['Glucose']  # Dependent variable
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create the linear regression model
+model = LinearRegression()
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# Print the results
+print(f'Mean Squared Error: {mse}')
+print(f'R-squared: {r2}')
+
+# Plotting the regression line with the data
+plt.figure(figsize=(8, 6))
+sns.scatterplot(x=X_test['BMI'], y=y_test, label='Actual data')
+plt.plot(X_test['BMI'], y_pred, color='red', label='Regression line')
+plt.title('Bivariate Regression: Glucose vs BMI')
+plt.xlabel('BMI')
+plt.ylabel('Glucose')
+plt.legend()
+plt.show()
+
+
+
+```
+
+```{python}
+model = LogisticRegression()
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred)
+
+# Print the results
+print(f'Accuracy: {accuracy}')
+print(f'Confusion Matrix:\n{conf_matrix}')
+print(f'Classification Report:\n{class_report}')
+
+# Plotting the logistic regression curve
+plt.figure(figsize=(8, 6))
+sns.scatterplot(x=X_test['BMI'], y=y_test, label='Actual data', color='blue')
+sns.lineplot(x=X_test['BMI'], y=model.predict_proba(X_test)[:, 1], color='red', label='Logistic Regression Curve')
+plt.title('Bivariate Logistic Regression: BMI vs Diabetes Outcome')
+plt.xlabel('BMI')
+plt.ylabel('Probability of Diabetes (Outcome = 1)')
+plt.legend()
+plt.show()
+```
